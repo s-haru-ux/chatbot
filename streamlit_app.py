@@ -3,16 +3,17 @@ from google import genai
 
 # 1. タイトルと説明文の表示
 st.title("💬 Gemini Chatbot")
-st.write(
-    "GoogleのAI「Gemini」を使用したチャットボットです。"
-    "使用するには、[Google AI Studio](https://aistudio.google.com/app/apikey)で取得できるGemini APIキーが必要です。"
-)
+st.write("GoogleのAI「Gemini」を使用したチャットボットです。")
 
-# 2. ユーザーからGemini APIキーを入力してもらう欄を表示
-gemini_api_key = st.text_input("Gemini API Key", type="password")
+# 2. APIキーの自動読み込み（Secretsに保存されているか確認）
+if "GEMINI_API_KEY" in st.secrets:
+    gemini_api_key = st.secrets["GEMINI_API_KEY"]
+else:
+    # Secretsになければ画面に入力欄を表示
+    gemini_api_key = st.text_input("Gemini API Key", type="password")
 
 if not gemini_api_key:
-    st.info("継続するにはGemini APIキーを入力してください。", icon="🗝️")
+    st.info("継続するにはGemini APIキーを設定してください。", icon="🗝️")
 else:
     # 3. Gemini APIクライアントの作成
     client = genai.Client(api_key=gemini_api_key)
@@ -46,7 +47,7 @@ else:
         # 9. AIから文字を順次受け取る関数（ストリーミング処理）
         def response_generator():
             response_stream = client.models.generate_content_stream(
-                model="gemini-3-flash-preview",  # 画像で確認できた正確なモデルID
+                model="gemini-3-flash-preview",
                 contents=gemini_contents,
             )
             for chunk in response_stream:
